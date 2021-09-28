@@ -1,0 +1,84 @@
+-- Tarea 3
+-- Ejercicios en preparación para el examen
+
+--1.Obtener un reporte de edades de los empleados para checar su elegibilidad para seguro de gastos médicos menores.
+
+select concat(f.first_name,' ',f.last_name), age(now(), f.birth_date)
+from employees f;
+
+--2.Cuál es la orden más reciente por cliente?
+
+select c.contact_name, max(o.order_date)
+from orders o join customers c on (c.customer_id=o.customer_id)
+group by c.contact_name, o.order_date 
+order by o.order_date asc ;
+
+--3.De nuestros clientes, qué función desempeñan y cuántos son?
+
+select count(c.contact_title), c.contact_title
+from customers c 
+group by c.contact_title 
+order by count(c.contact_title) desc;
+
+--4.Cuántos productos tenemos de cada categoría?
+
+select c.category_name, count(c.category_name)
+from categories c join products p on c.category_id = p.category_id 
+group by c.category_name;
+
+--5.Cómo podemos generar el reporte de reorder?
+
+select product_id, product_name, units_in_stock, reorder_level 
+from products p 
+where (units_in_stock<reorder_level);
+
+--6.A donde va nuestro envío más voluminoso?
+
+select o.ship_country, max(od.quantity) AS units 
+from order_details od
+join orders o on o.order_id  = od.order_id 
+group by (o.ship_country)
+order by (units) desc limit 2 
+
+select o.ship_country , sum(od.quantity) as suma_productos
+from orders o join order_details od on o.order_id  = od.order_id 
+group by o.order_id
+order by suma_productos desc;
+
+--7.Cómo creamos una columna en customers que nos diga si un cliente es bueno, regular, o malo?
+
+select t.company_name, t.total,
+	case 
+		when t.total < 10000 then 'malo'
+		when t.total >= 10000 and t.total <100000 then 'regular'
+		else 'bueno'
+	end as categoria
+from (
+	select c.company_name,  
+		sum(od.unit_price*od.quantity*(1-od.discount))as total  
+	from customers c 
+		join orders o using (customer_id)
+		join order_details od using (order_id)
+	group by c.company_name
+	order by total
+) as t;
+
+--8.Qué colaboradores chambearon durante las fiestas de navidad?
+
+select concat(f.first_name,' ',f.last_name)
+from employees f join orders o on f.employee_id=o.employee_id 
+where extract(month from o.shipped_date)= 12 and extract (day from o.shipped_date) = 25;
+
+--9.Qué productos mandamos en navidad?
+
+select p.product_name 
+from products p join order_details od on p.product_id =od.product_id 
+join orders o on od.order_id = o.order_id
+where extract(month from o.shipped_date) = 12 and extract(day from o.shipped_date) = 25;
+
+--10.Qué país recibe el mayor volumen de producto?
+
+select o.ship_country , sum(od.quantity) as suma_productos
+from orders o join order_details od on o.order_id  = od.order_id 
+group by o.ship_country
+order by suma_productos desc;

@@ -40,6 +40,6 @@ insert into mcu.registro(nombre, email) values
 ('Nebula', 'idonthaveelektras@complex.thanos'),
 ('Gamora', 'thefiercestwomaninthegalaxy@thanos.'),
 ('Rocket', 'shhhhhhhh@darknet.ru');
-select g.email 
-from mcu.gym g 
-where g.email like '%@%.___%';
+select r.email 
+from mcu.registro r 
+where r.email like '%@%.___%';
